@@ -13,51 +13,54 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'vim-syntastic/syntastic'
-Plugin 'bling/vim-bufferline'
 Plugin 'fugitive.vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'tomasiser/vim-code-dark'
+Plugin 'neoclide/coc.nvim', {'branch': 'release'}
 Plugin 'leafgarland/typescript-vim'
-Plugin 'ryanoasis/vim-devicons'
-Plugin 'dense-analysis/ale'
-Plugin 'pangloss/vim-javascript'
-Plugin 'valloric/youcompleteme'
-Plugin 'tpope/vim-commentary'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'w0rp/ale'
+Plugin 'maxmellon/vim-jsx-pretty'
 Plugin 'surround.vim'
 Plugin 'jiangmiao/auto-pairs'
+Plugin 'roman/golden-ratio'
+Plugin 'joegesualdo/jsdoc.vim'
+Plugin 'kien/ctrlp.vim'
+Plugin 'mattn/emmet-vim'
+Plugin 'tpope/vim-commentary'
+Plugin 'pangloss/vim-javascript'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'mattn/emmet-vim'
+Plugin 'chemzqm/vim-jsx-improve'
+" Plugin 'mg979/vim-visual-multi'
 
-call vundle#end()            " required
+call vundle#end() " required
+
+"""""""""""""
+" Searching "
+"""""""""""""
+set ignorecase
+set smartcase
+set hlsearch
+
+" Don't overwrite register after a paste
+xnoremap p "_dP
+
+""""""""""
+" Tuning "
+""""""""""
+set noswapfile
+set nobackup
+set autoread
 
 """"""""""""""""""""""""""
 " Syntax and Indentation "
 """"""""""""""""""""""""""
 
-filetype plugin indent on    " required
+filetype plugin indent on    " filetype specific indent
 syntax on "Enable syntax highlighting
-
-set shiftwidth=2 "New line indent
-set autoindent
-set smartindent
-
-set ts=2 "2 Space tab
-set sts=2 "For backspace to delete 2 spaces
-set et "To convert tabs to spaces
-
-set foldmethod=indent "Code collapse on indentation
-set foldnestmax=10 "Limit nesting of folds
-set nofoldenable "Disable folding while opening the file
-set foldlevel=2 "To not fold first and last lines
-
-set diffopt+=vertical "Always split vim panes vertically
-
-colorscheme synthwave "Get this ColorScheme here - https://github.com/TroyFletcher/vim-colors-synthwave
-
+set wildmenu " visual autocomplete for command menu
+set wildmode=longest,full " Enable file autocomplete in command mode
 set number relativenumber "For line numbers relative to current line number 
 :augroup numbertoggle
 :  autocmd!
@@ -65,35 +68,135 @@ set number relativenumber "For line numbers relative to current line number
 :  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 :augroup END
 
+set shiftwidth=2 "New line indent
+set autoindent
+set smartindent
+set showmatch " highlight matching [{()}]
+set scrolloff=15 " always leave 15 spaces when scrolling
+
+
+"""""""
+" Ale "
+"""""""
+" let g:ale_fix_on_save = 1
+" Fix files with prettier, and then ESLint.
+let g:ale_fixers = {
+\  'javascript': ['eslint'],
+\}
+let g:ale_linters= {
+\  'javascript': ['eslint'],
+\}
+let g:ale_linters_ignore = { 'javascript': ['standard'], }
+let g:ale_sign_error = '✘'
+let g:ale_sign_warning = '⚠'
+let g:ale_echo_msg_format = '%linter% says %s'
+highlight ALEErrorSign ctermbg=NONE ctermfg=red
+highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
+
+
+"""""""""""""""
+" Tab Control "
+"""""""""""""""
+set tabstop=2
+set ts=2 "2 Space tab
+set sts=2 "For backspace to delete 2 spaces
+set et "To convert tabs to spaces
+
+"""""""""""""""""""""""
+" Code folding method "
+"""""""""""""""""""""""
+set foldmethod=indent "Code collapse on indentation
+set foldnestmax=10 "Limit nesting of folds
+set nofoldenable "Disable folding while opening the file
+set foldlevel=2 "To not fold first and last lines
+
+set t_Co=256 " Explicitly tell vim that the terminal supports 256 colors
+
+if &term =~ '256color'
+  " disable background color erase
+  set t_ut=
+endif
+
+""""""""""""""""""""""""""""""""""""""""""""
+" enable 24 bit color support if supported "
+""""""""""""""""""""""""""""""""""""""""""""
+if (has("termguicolors"))
+  if (!(has("nvim")))
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  endif
+  set termguicolors
+endif
+
+"""""""""""""""""""""""
+" highlight conflicts "
+"""""""""""""""""""""""
+match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
+
+set diffopt+=vertical " Always split vim panes vertically
+set splitright " Vertical split opens to the right"
+
+set t_Co=256
+" colorscheme koehler
+colorscheme synthwave "Get this ColorScheme here - https://github.com/TroyFletcher/vim-colors-synthwave
+
 map <C-n> :NERDTreeToggle<CR>
 
 """"""""""""""
-" ALE Config "
+" jsdoc.vim  "
 """"""""""""""
-let g:ale_fixers = {
-      \  'javascript': ['standard'],
-      \  'typescript': ['tslint']
-      \}
-let g:ale_linters_ignore = {'javascript': ['eslint']}
-let g:ale_lint_on_save = 1
-let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
-let b:ale_linters = []
-let g:ale_echo_cursor = 0 
+nnoremap <c-j> :<C-u>call JSDocAdd()<CR>
 
 """""""""""""""""
 " Ctrl-P config "
 """""""""""""""""
-" Fuzzy file search
-
-let g:ctrlp_custom_ignore = { 'dir': 'node_modules$' }
+let g:ctrlp_custom_ignore = { 'dir': 'node_modules$\|\dist$' }
 
 """"""""""""""""
 " Emmet config "
 """"""""""""""""
-" HTML auto completion
-
 let g:user_emmet_leader_key=','
+
+""""""""""""""
+" COC config "
+""""""""""""""
+nmap <leader>gd <Plug>(coc-definition)
+nmap <leader>gy <Plug>(coc-type-definition)
+nmap <leader>gi <Plug>(coc-implementation)
+nmap <leader>gr <Plug>(coc-references)
+" nmap <leader>rr <Plug>(coc-rename)
+" nmap <leader>g[ <Plug>(coc-diagnostic-prev)
+" nmap <leader>g] <Plug>(coc-diagnostic-next)
+" nmap <silent> <leader>gp <Plug>(coc-diagnostic-prev-error)
+" nmap <silent> <leader>gn <Plug>(coc-diagnostic-next-error)
+nnoremap <leader>cr :CocRestart
+
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
 """"""""""""""""""""
 " Buffer shortcuts "
@@ -116,24 +219,38 @@ noremap <leader>q :q<CR>
 
 " Yank(Copy)
 " leader + y - copy selected text to + register
-" leader + p - paste text from + register after the cursor
-" leader + P - paste text from + register before the cursor
 vnoremap <leader>y "+y
-vnoremap <leader>p "+p
-vnoremap <leader>p "+P
 
-" Easy navigation in insert mode
-inoremap <C-h> <Left>
-inoremap <C-j> <Down>
-inoremap <C-k> <Up>
-inoremap <C-l> <Right>
-cnoremap <C-h> <Left>
-cnoremap <C-j> <Down>
-cnoremap <C-k> <Up>
-cnoremap <C-l> <Right>
+" Put Search on top
+nnoremap n nzz
+nnoremap N Nzz
+xnoremap n nzz
+xnoremap N Nzz
 
 " current position line
 map <leader>. :set cul! cuc!<cr>|"Toggle cursor crosshair. Great when you get a big monitor and you're jumping around.
 
+" Move the selected block of text up or down
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
+" Vertically resize panes
+nnoremap <leader>- :vertical resize -5<CR>
+nnoremap <leader>+ :vertical resize +5<CR>
+
+" Give more space for displaying messages.
+set cmdheight=2
+
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" " delays and poor user experience.
+set updatetime=750
+
 " Vim Airline
 let g:airline#extensions#tabline#enabled = 1
+
+" Remove nasty grey from git gutter background
+highlight clear SignColumn
+
+" keeps cursor at the center while navigating
+nnoremap j gj
+nnoremap k gk
